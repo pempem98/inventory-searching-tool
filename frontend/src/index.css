@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-image: url('/masterise-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+
 /* Custom AG-Grid Header Styles */
 .ag-theme-alpine .ag-header-cell-label {
   /* Cho phép văn bản tự động xuống dòng */

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import ContactPopup from './ContactPopup';
 
 // Component để hiển thị các ô chứa link
 const LinkCellRenderer = (params) => {
@@ -20,7 +21,6 @@ const LinkCellRenderer = (params) => {
   return params.value;
 };
 
-// CẬP NHẬT: Định nghĩa đúng thứ tự cho bộ lọc phụ thuộc
 const QUICK_FILTER_FIELDS = ['Phân khu', 'Tòa', 'Loại căn hộ', 'Căn', 'Tầng'];
 const PRICE_FIELDS = ['Tổng giá bán sau VAT và KPBT', 'TTTĐ', 'TTS', 'Vay'];
 const NUMERIC_FIELDS = ['Diện tích thông thủy', ...PRICE_FIELDS];
@@ -161,16 +161,23 @@ function App() {
   }, [rowData]);
 
   const defaultColDef = useMemo(() => ({ filterParams: { debounceMs: 200 } }), []);
-
+  
   const onGridReady = useCallback((params) => {
     setGridApi(params.api);
-    params.api.applyColumnState({
-      state: [ { colId: 'Tổng giá bán sau VAT và KPBT', sort: 'asc' }, { colId: 'Loại quỹ', sort: 'asc' } ],
-      defaultState: { sort: null },
-    });
   }, []);
 
-  // CẬP NHẬT: Logic reset các filter con khi filter cha thay đổi
+  useEffect(() => {
+    if (gridApi && rowData.length > 0) {
+        gridApi.applyColumnState({
+            state: [
+                { colId: 'Tổng giá bán sau VAT và KPBT', sort: 'asc' },
+                { colId: 'Loại quỹ', sort: 'asc' }
+            ],
+            defaultState: { sort: null },
+        });
+    }
+  }, [gridApi, rowData]);
+
   const handleQuickFilterClick = (field, value) => {
     setActiveFilters(prev => {
         const current = prev[field] || [];
@@ -180,7 +187,6 @@ function App() {
         
         const newFilters = { ...prev, [field]: newValues };
         
-        // Reset tất cả các filter con khi filter cha thay đổi
         const fieldIndex = QUICK_FILTER_FIELDS.indexOf(field);
         for (let i = fieldIndex + 1; i < QUICK_FILTER_FIELDS.length; i++) {
             const childField = QUICK_FILTER_FIELDS[i];
@@ -195,9 +201,18 @@ function App() {
     setActiveFilters({});
     setPriceRange({ min: null, max: null });
     setPriceFilterField(PRICE_FIELDS[0]);
+    
+    if (gridApi) {
+        gridApi.applyColumnState({
+            state: [
+                { colId: 'Tổng giá bán sau VAT và KPBT', sort: 'asc' },
+                { colId: 'Loại quỹ', sort: 'asc' }
+            ],
+            defaultState: { sort: null },
+        });
+    }
   };
   
-  // Dòng chảy "xuống": Áp dụng filter từ state vào bảng
   useEffect(() => {
     if (!gridApi) return;
     isApplyingQuickFilter.current = true;
@@ -225,9 +240,15 @@ function App() {
 
     gridApi.setFilterModel(filterModel);
 
+    gridApi.applyColumnState({
+        state: [
+            { colId: 'Tổng giá bán sau VAT và KPBT', sort: 'asc' }
+        ],
+        defaultState: { sort: null },
+    });
+
   }, [activeFilters, gridApi, priceRange, priceFilterField]);
 
-  // Dòng chảy "ngược": Lắng nghe thay đổi từ bảng và cập nhật state
   const onFilterChanged = useCallback(() => {
     if (isApplyingQuickFilter.current) {
         isApplyingQuickFilter.current = false;
@@ -253,7 +274,7 @@ function App() {
   const rowClassRules = useMemo(() => ({ 'exclusive-fund-row': (params) => params.data['Loại quỹ'] === '1.Độc quyền' }), []);
 
   return (
-    <div className="p-4 md:p-8 bg-gray-100 min-h-screen">
+    <div className="p-4 md:p-8 min-h-screen">
       <header className="mb-8 text-center">
         <h1 className="text-3xl md:text-5xl font-bold text-gray-800">Quỹ căn hộ Masterise Homes</h1>
         <p className="text-gray-500 mt-2">Lê Thu Hiền | Dép Lào: 098.819.8519</p>
@@ -342,6 +363,13 @@ function App() {
           onFilterChanged={onFilterChanged}
         />
       </div>
+
+      <footer className="text-center mt-8 text-gray-500 text-sm">
+        <p>Copyright &copy; {new Date().getFullYear()} Lucas Do. All Rights Reserved.</p>
+      </footer>
+
+      <ContactPopup />
+
     </div>
   );
 }
