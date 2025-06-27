@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom AG-Grid Header Styles */
+.ag-theme-alpine .ag-header-cell-label {
+  /* Cho phép văn bản tự động xuống dòng */
+  white-space: normal !important;
+  
+  /* Căn giữa nội dung theo chiều ngang */
+  justify-content: center !important;
+  
+  /* Chuyển đổi văn bản thành chữ hoa */
+  text-transform: uppercase;
+
+  /* Căn giữa văn bản nếu nó xuống dòng */
+  text-align: center;
+}
+
+/* Căn giữa nội dung cho các ô dữ liệu */
+.ag-theme-alpine .ag-cell {
+  text-align: center;
+}
+
+/* Định dạng cho các hàng thuộc quỹ độc quyền */
+.ag-theme-alpine .exclusive-fund-row {
+  background-color: #D1FAE5 !important; /* Màu xanh lá cây nhạt */
+  color: #065F46 !important; /* Màu xanh lá cây đậm */
+}

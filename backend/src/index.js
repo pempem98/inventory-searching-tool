@@ -14,8 +14,9 @@ const POLLING_INTERVAL = 300000;
 const HEADER_ROW_NUMBER = parseInt(process.env.HEADER_ROW_NUMBER, 10) || 1;
 
 const allowedColumns = [
-    'tòa', 'tầng', 'căn', 'mã căn', 'tổng giá bán sau vat và kpbt', 'diện tích tim tường', 
-    'hướng', 'loại căn hộ', 'link ptg', 'link ảnh chỉ căn', 'loại quỹ',
+    'tòa', 'tầng', 'căn', 'mã căn', 'tổng giá bán sau vat và kpbt', 'diện tích thông thủy', 
+    'hướng', 'loại căn hộ', 'link ptg', 'link ảnh chỉ căn', 'loại quỹ', 'phân khu',
+    'tttđ', 'tts', 'vay',
 ];
 const escapedAllowedColumns = allowedColumns.map(col => col.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
 const regexPattern = new RegExp(`^\\s*(${escapedAllowedColumns.join('|')})\\s*$`, 'i');
