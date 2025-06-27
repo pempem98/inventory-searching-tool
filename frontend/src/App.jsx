@@ -3,6 +3,7 @@ import axios from 'axios';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import ContactPopup from './ContactPopup';
 
 // Component để hiển thị các ô chứa link
 const LinkCellRenderer = (params) => {
@@ -273,7 +274,7 @@ function App() {
   const rowClassRules = useMemo(() => ({ 'exclusive-fund-row': (params) => params.data['Loại quỹ'] === '1.Độc quyền' }), []);
 
   return (
-    <div className="p-4 md:p-8 bg-gray-100 min-h-screen">
+    <div className="p-4 md:p-8 min-h-screen">
       <header className="mb-8 text-center">
         <h1 className="text-3xl md:text-5xl font-bold text-gray-800">Quỹ căn hộ Masterise Homes</h1>
         <p className="text-gray-500 mt-2">Lê Thu Hiền | Dép Lào: 098.819.8519</p>
@@ -366,6 +367,8 @@ function App() {
       <footer className="text-center mt-8 text-gray-500 text-sm">
         <p>Copyright &copy; {new Date().getFullYear()} Lucas Do. All Rights Reserved.</p>
       </footer>
+
+      <ContactPopup />
 
     </div>
   );
