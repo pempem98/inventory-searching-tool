@@ -1,0 +1,5 @@
+# Chạy tập lệnh update_dns.sh mỗi 5 phút
+# Kết quả và lỗi sẽ được chuyển hướng đến log của container Docker
+*/5 * * * * /usr/src/app/update_dns.sh >> /proc/1/fd/1 2>> /proc/1/fd/2
+
+# Dòng trống cuối cùng này rất quan trọng cho crontab, đừng xóa nó

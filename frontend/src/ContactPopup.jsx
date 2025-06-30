@@ -24,12 +24,13 @@ const ZaloIcon = () => (
 
 const ContactPopup = () => {
   const phoneNumber = '0988198519';
+  const zaloGroupId = 'dmuvwr503'
 
   return (
     <div className="fixed bottom-5 right-5 flex flex-col items-center gap-3 z-50">
       {/* Nút Zalo */}
       <a
-        href={`https://zalo.me/${phoneNumber}`}
+        href={`https://zalo.me/g/${zaloGroupId}`}
         target="_blank"
         rel="noopener noreferrer"
         className="bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity group"

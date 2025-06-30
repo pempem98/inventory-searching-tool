@@ -91,21 +91,18 @@ function App() {
       .catch(error => console.error("Error fetching data: ", error));
   }, []);
   
-  // CẬP NHẬT LỚN: Logic tính toán các nút filter phụ thuộc
+  // Logic tính toán các nút filter phụ thuộc
   useEffect(() => {
     if (rowData.length === 0) return;
     
     let dataForCascading = [...rowData];
     const newQuickFilterValues = {};
 
-    // Lặp qua từng cấp filter để tính toán các tùy chọn hiển thị
     for (const field of QUICK_FILTER_FIELDS) {
-        // Lấy các giá trị duy nhất từ tập dữ liệu đã được lọc ở các cấp trước
         const uniqueValues = [...new Set(dataForCascading.map(item => item[field]).filter(Boolean))];
         uniqueValues.sort((a, b) => String(a).localeCompare(String(b), undefined, {numeric: true}));
         newQuickFilterValues[field] = uniqueValues;
 
-        // Nếu có filter đang active cho cấp này, hãy lọc `dataForCascading` để chuẩn bị cho cấp tiếp theo
         const activeValuesForField = activeFilters[field];
         if (activeValuesForField && activeValuesForField.length > 0) {
             dataForCascading = dataForCascading.filter(item => activeValuesForField.includes(item[field]));
@@ -118,28 +115,44 @@ function App() {
 
   useEffect(() => {
     if (rowData.length === 0) return;
+    
     const desiredColumnOrder = [
-        'Phân khu', 'Tòa', 'Loại căn hộ', 'Căn', 'Tầng', 'Mã căn', 'Diện tích thông thủy', 'Hướng', 'Tổng giá bán sau VAT và KPBT', 'TTTĐ', 'TTS', 'Vay', 'Link PTG', 'Link ảnh chỉ căn', 'Loại quỹ'
+        'Mã căn', 'Loại căn hộ', 'Diện tích thông thủy', 'Hướng', 'Tổng giá bán sau VAT và KPBT', 'TTTĐ', 'TTS', 'Vay', 'Link PTG', 'Link ảnh chỉ căn'
     ];
+    const columnsToHide = ['Phân khu', 'Tòa', 'Tầng', 'Căn', 'Loại quỹ'];
+
     const existingHeaders = Object.keys(rowData[0]);
-    const finalColumnOrder = [...desiredColumnOrder, ...existingHeaders.filter(h => !desiredColumnOrder.includes(h))];
+    const finalColumnOrder = [...desiredColumnOrder, ...columnsToHide, ...existingHeaders.filter(h => !desiredColumnOrder.includes(h) && !columnsToHide.includes(h))];
+    
     const colDefs = finalColumnOrder.map(header => {
         const colDef = { 
-            headerName: header, field: header, sortable: true, resizable: true, floatingFilter: true, suppressHeaderMenuButton: true
+            headerName: header, 
+            field: header, 
+            sortable: true, 
+            resizable: true, 
+            floatingFilter: true,
+            minWidth: 120 // *** THAY ĐỔI: Thêm độ rộng tối thiểu cho tất cả các cột ***
         };
+
+        if (columnsToHide.includes(header)) {
+            colDef.hide = true;
+        }
+
         switch (header) {
-            case 'Mã căn': case 'Tòa': case 'Loại căn hộ': case 'Phân khu': colDef.flex = 1; break;
+            case 'Mã căn': colDef.flex = 1; break;
+            case 'Tòa': colDef.flex = 1; break;
+            case 'Loại căn hộ': colDef.flex = 1; break;
+            case 'Phân khu': colDef.flex = 1; break;
             case 'Diện tích thông thủy': colDef.flex = 1.25; break;
             case 'Tổng giá bán sau VAT và KPBT': colDef.flex = 1.5; break;
-            case 'Tầng': case 'Căn': colDef.flex = 0.75; break;
+            case 'Tầng': colDef.flex = 0.75; break;
+            case 'Căn': colDef.flex = 0.75; break;
             default: colDef.flex = 1; break;
         }
 
         if (QUICK_FILTER_FIELDS.includes(header)) {
             colDef.filter = 'agTextColumnFilter';
-            colDef.filterParams = {
-                textMatcher: orFilterMatcher,
-            };
+            colDef.filterParams = { textMatcher: orFilterMatcher };
         } else if (NUMERIC_FIELDS.includes(header)) {
             colDef.filter = 'agNumberColumnFilter';
             colDef.comparator = customNumberComparator;
@@ -160,7 +173,10 @@ function App() {
     setColumnDefs(colDefs);
   }, [rowData]);
 
-  const defaultColDef = useMemo(() => ({ filterParams: { debounceMs: 200 } }), []);
+  const defaultColDef = useMemo(() => ({ 
+      filterParams: { debounceMs: 200 },
+      suppressHeaderMenuButton: false, 
+    }), []);
   
   const onGridReady = useCallback((params) => {
     setGridApi(params.api);
@@ -184,15 +200,12 @@ function App() {
         const newValues = current.includes(value) 
             ? current.filter(v => v !== value)
             : [...current, value];
-        
         const newFilters = { ...prev, [field]: newValues };
-        
         const fieldIndex = QUICK_FILTER_FIELDS.indexOf(field);
         for (let i = fieldIndex + 1; i < QUICK_FILTER_FIELDS.length; i++) {
             const childField = QUICK_FILTER_FIELDS[i];
             newFilters[childField] = [];
         }
-
         return newFilters;
     });
   };
@@ -201,7 +214,6 @@ function App() {
     setActiveFilters({});
     setPriceRange({ min: null, max: null });
     setPriceFilterField(PRICE_FIELDS[0]);
-    
     if (gridApi) {
         gridApi.applyColumnState({
             state: [
@@ -216,15 +228,12 @@ function App() {
   useEffect(() => {
     if (!gridApi) return;
     isApplyingQuickFilter.current = true;
-    
     const filterModel = {};
-    
     Object.entries(activeFilters).forEach(([field, values]) => {
       if (values && values.length > 0) {
         filterModel[field] = { filterType: 'text', type: 'contains', filter: values.join('|') };
       }
     });
-    
     const min = priceRange.min !== null && priceRange.min !== '' ? Number(priceRange.min) : null;
     const max = priceRange.max !== null && priceRange.max !== '' ? Number(priceRange.max) : null;
     if (min !== null || max !== null) {
@@ -237,16 +246,11 @@ function App() {
           filterModel[priceFilterField] = { ...priceFilterModel, type: 'lessThanOrEqual', filter: max };
       }
     }
-
     gridApi.setFilterModel(filterModel);
-
     gridApi.applyColumnState({
-        state: [
-            { colId: 'Tổng giá bán sau VAT và KPBT', sort: 'asc' }
-        ],
+        state: [ { colId: 'Tổng giá bán sau VAT và KPBT', sort: 'asc' } ],
         defaultState: { sort: null },
     });
-
   }, [activeFilters, gridApi, priceRange, priceFilterField]);
 
   const onFilterChanged = useCallback(() => {
@@ -255,21 +259,16 @@ function App() {
         return;
     }
     if (!gridApi) return;
-
     const newActiveFilters = {};
     const model = gridApi.getFilterModel();
-
     QUICK_FILTER_FIELDS.forEach(field => {
         if (model[field] && model[field].filterType === 'text') {
             const filterText = model[field].filter;
             newActiveFilters[field] = filterText ? filterText.split('|').map(v => v.trim()).filter(Boolean) : [];
         }
     });
-    
     setActiveFilters(newActiveFilters);
-
   }, [gridApi]);
-
 
   const rowClassRules = useMemo(() => ({ 'exclusive-fund-row': (params) => params.data['Loại quỹ'] === '1.Độc quyền' }), []);
 
@@ -277,7 +276,7 @@ function App() {
     <div className="p-4 md:p-8 min-h-screen">
       <header className="mb-8 text-center">
         <h1 className="text-3xl md:text-5xl font-bold text-gray-800">Quỹ căn hộ Masterise Homes</h1>
-        <p className="text-gray-500 mt-2">Lê Thu Hiền | Dép Lào: 098.819.8519</p>
+        <p className="text-gray-500 mt-2">Lê Thu Hiền | Liên hệ: 098.819.8519</p>
       </header>
 
       <div className="mb-4 p-4 bg-white rounded-lg shadow">
@@ -349,19 +348,23 @@ function App() {
         ))}
       </div>
 
-      <div className="ag-theme-alpine shadow-2xl rounded-lg overflow-hidden" style={{ height: '75vh', width: '100%' }}>
-        <AgGridReact
-          rowData={rowData}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          pagination={true}
-          paginationPageSize={20}
-          animateRows={true}
-          onGridReady={onGridReady}
-          rowClassRules={rowClassRules}
-          enableCellTextSelection={true}
-          onFilterChanged={onFilterChanged}
-        />
+      <div className="ag-theme-alpine shadow-2xl rounded-lg" style={{ height: '75vh', width: '100%' }}>
+        {/* *** THAY ĐỔI: Bọc Grid trong một div có overflowX *** */}
+        <div style={{ height: '100%', width: '100%', overflowX: 'auto' }}>
+            <AgGridReact
+            rowData={rowData}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            pagination={true}
+            paginationPageSize={20}
+            animateRows={true}
+            onGridReady={onGridReady}
+            rowClassRules={rowClassRules}
+            enableCellTextSelection={true}
+            onFilterChanged={onFilterChanged}
+            headerHeight={60} // *** THAY ĐỔI: Thêm chiều cao cho header ***
+            />
+        </div>
       </div>
 
       <footer className="text-center mt-8 text-gray-500 text-sm">
