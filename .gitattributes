@@ -1,0 +1,3 @@
+# Các file text sẽ được chuẩn hóa và các file script sẽ dùng định dạng LF
+* text=auto
+*.sh eol=lf
