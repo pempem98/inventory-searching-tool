@@ -4,6 +4,8 @@ const { google } = require('googleapis');
 const cors = require('cors');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const http = require('http');
+const { WebSocketServer } = require('ws');
 
 const app = express();
 app.use(cors());
@@ -84,8 +86,36 @@ app.get('/api/data', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Backend server is running on http://localhost:${PORT}`);
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server, path: "/ws" });
+
+console.log('[DIAGNOSTIC] WebSocket Server configured to listen on path: /ws');
+
+const broadcastVisitorCount = () => {
+    const visitorCount = wss.clients.size;
+    const message = JSON.stringify({ type: 'visitorCountUpdate', count: visitorCount });
+    console.log(`[SERVER LOG] Broadcasting visitor count: ${visitorCount}`);
+    wss.clients.forEach(client => {
+        if (client.readyState === client.OPEN) {
+            client.send(message);
+        }
+    });
+};
+
+wss.on('connection', (ws) => {
+    console.log('[DIAGNOSTIC] A new client connection was established!');
+    broadcastVisitorCount();
+    ws.on('close', () => {
+        console.log('[DIAGNOSTIC] A client has disconnected.');
+        setTimeout(broadcastVisitorCount, 100);
+    });
+    ws.on('error', (error) => {
+        console.error('[DIAGNOSTIC] WebSocket error on a connection:', error);
+    });
+});
+
+server.listen(PORT, () => {
+    console.log(`[DIAGNOSTIC] Backend server is running on http://localhost:${PORT}`);
     pollAndCacheData();
     setInterval(pollAndCacheData, POLLING_INTERVAL);
 });

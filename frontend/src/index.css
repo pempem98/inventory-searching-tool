@@ -56,3 +56,28 @@ body {
     padding: 8px 4px !important;
   }
 }
+
+/* Làm cho các hàng chẵn có màu nền xám nhạt */
+.ag-theme-alpine .ag-row-even {
+  background-color: #f8f9fa;
+}
+
+/* Các hàng lẻ vẫn giữ màu trắng */
+.ag-theme-alpine .ag-row-odd {
+  background-color: #ffffff;
+}
+
+/* Thêm hiệu ứng hover để làm nổi bật hàng đang được trỏ vào */
+.ag-theme-alpine .ag-row:hover {
+  background-color: #e6f7ff;
+}
+
+/* * Giữ lại màu của hàng "độc quyền", đảm bảo nó được ưu tiên cao hơn 
+ * so với màu của hàng chẵn/lẻ và hiệu ứng hover.
+ */
+.ag-theme-alpine .exclusive-fund-row,
+.ag-theme-alpine .exclusive-fund-row:hover {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  font-weight: 500;
+}
