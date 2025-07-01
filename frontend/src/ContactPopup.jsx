@@ -1,13 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-// SVG cho biểu tượng Điện thoại
 const PhoneIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
   </svg>
 );
-
-// SVG cho biểu tượng Zalo
 const ZaloIcon = () => (
     <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-12 w-12">
         <path fillRule="evenodd" clipRule="evenodd" d="M22.782 0.166016H27.199C33.2653 0.166016 36.8103 1.05701 39.9572 2.74421C43.1041 4.4314 45.5875 6.89585 47.2557 10.0428C48.9429 13.1897 49.8339 16.7347 49.8339 22.801V27.1991C49.8339 33.2654 48.9429 36.8104 47.2557 39.9573C45.5685 43.1042 43.1041 45.5877 39.9572 47.2559C36.8103 48.9431 33.2653 49.8341 27.199 49.8341H22.8009C16.7346 49.8341 13.1896 48.9431 10.0427 47.2559C6.89583 45.5687 4.41243 43.1042 2.7442 39.9573C1.057 36.8104 0.166016 33.2654 0.166016 27.1991V22.801C0.166016 16.7347 1.057 13.1897 2.7442 10.0428C4.43139 6.89585 6.89583 4.41245 10.0427 2.74421C13.1707 1.05701 16.7346 0.166016 22.782 0.166016Z" fill="#0068FF"/>
@@ -20,39 +17,40 @@ const ZaloIcon = () => (
         <path d="M29.4562 29.0944H30.5747V19.957H28.6221V28.2793C28.6221 28.7153 29.0012 29.0944 29.4562 29.0944Z" fill="#0068FF"/>
     </svg>
 );
-
+const CloseIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+const ChatIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
 
 const ContactPopup = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const phoneNumber = '0988198519';
-  const zaloGroupId = 'dmuvwr503'
+  const zaloGroupId = 'dmuvwr503';
+  const togglePopup = () => setIsExpanded(!isExpanded);
 
   return (
     <div className="fixed bottom-5 right-5 flex flex-col items-center gap-3 z-50">
-      {/* Nút Zalo */}
-      <a
-        href={`https://zalo.me/g/${zaloGroupId}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity group"
-        aria-label="Chat on Zalo"
-      >
-        <ZaloIcon />
-        <span className="absolute right-full mr-3 px-2 py-1 bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          Chat Zalo
-        </span>
-      </a>
-
-      {/* Nút Điện thoại */}
-      <a
-        href={`tel:${phoneNumber}`}
-        className="bg-green-500 w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-green-600 transition-all group"
-        aria-label="Call hotline"
-      >
-        <PhoneIcon />
-        <span className="absolute right-full mr-3 px-2 py-1 bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          Gọi Hotline
-        </span>
-      </a>
+      {isExpanded && (
+        <>
+          <a href={`https://zalo.me/g/${zaloGroupId}`} target="_blank" rel="noopener noreferrer" className="bg-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity group" aria-label="Chat on Zalo">
+            <ZaloIcon />
+            <span className="absolute right-full mr-3 px-2 py-1 bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Chat Zalo</span>
+          </a>
+          <a href={`tel:${phoneNumber}`} className="bg-green-500 w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-green-600 transition-all group" aria-label="Call hotline">
+            <PhoneIcon />
+            <span className="absolute right-full mr-3 px-2 py-1 bg-gray-700 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Gọi Hotline</span>
+          </a>
+        </>
+      )}
+      <button onClick={togglePopup} className="bg-blue-500 w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 transition-all transform hover:scale-110" aria-label={isExpanded ? "Close contact options" : "Open contact options"}>
+        {isExpanded ? <CloseIcon /> : <ChatIcon />}
+      </button>
     </div>
   );
 };
